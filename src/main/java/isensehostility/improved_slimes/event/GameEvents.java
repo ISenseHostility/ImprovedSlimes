@@ -1,6 +1,7 @@
 package isensehostility.improved_slimes.event;
 
 import isensehostility.improved_slimes.ImprovedSlimes;
+import isensehostility.improved_slimes.config.ISConfig;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.attributes.Attributes;
@@ -17,16 +18,6 @@ import net.minecraftforge.fml.common.Mod;
 @Mod.EventBusSubscriber(modid = ImprovedSlimes.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class GameEvents {
 
-    private static final float DAMAGE_RESISTANCE = 1.5F;
-    private static final float KNOCKBACK_RESISTANCE = 2.0F;
-    private static final int RARE_SLIME_SIZE = 6;
-    private static final float RARE_SLIME_CHANCE = 0.5F;
-    private static final float HEALTH_BOOST_LARGE_SLIMES = 1.5F;
-    private static final float HEALTH_BOOST_SMALL_SLIMES = 2.0F;
-    private static final float HEALTH_BOOST_RARE_SLIMES = 1.25F;
-    private static final float ATTACK_DAMAGE_INCREASE = 1.35F;
-    private static final float WEAKNESS_DAMAGE_INCREASE = 1.3F;
-
     @SubscribeEvent
     public static void onEntitySpawn(EntityJoinWorldEvent event) {
         World level = event.getWorld();
@@ -36,19 +27,19 @@ public class GameEvents {
 
             if (entity instanceof SlimeEntity slime) {
                 if (slime.getSize() >= 3) {
-                    ImprovedSlimes.setMaxHealth(slime, (slime.getMaxHealth() * HEALTH_BOOST_LARGE_SLIMES));
+                    ImprovedSlimes.setMaxHealth(slime, (slime.getMaxHealth() * ISConfig.getHealthBoostLargeSlimes()));
                 } else {
-                    ImprovedSlimes.setMaxHealth(slime, (slime.getMaxHealth() * HEALTH_BOOST_SMALL_SLIMES));
+                    ImprovedSlimes.setMaxHealth(slime, (slime.getMaxHealth() * ISConfig.getHealthBoostSmallSlimes()));
                 }
-                if (slime.getRandom().nextInt(100) < RARE_SLIME_CHANCE) {
-                    slime.setSize(RARE_SLIME_SIZE, false);
+                if (slime.getRandom().nextInt(100) < ISConfig.getRareSlimeChance()) {
+                    slime.setSize(ISConfig.getRareSlimeSize(), false);
 
                     slime.setCustomName(new TranslationTextComponent("improved_slimes.rare_slime.name"));
 
-                    ImprovedSlimes.setMaxHealth(slime, (slime.getMaxHealth() * HEALTH_BOOST_RARE_SLIMES));
+                    ImprovedSlimes.setMaxHealth(slime, (slime.getMaxHealth() * ISConfig.getHealthBoostRareSlimes()));
                 }
 
-                slime.getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(slime.getAttributeValue(Attributes.ATTACK_DAMAGE) * ATTACK_DAMAGE_INCREASE);
+                slime.getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(slime.getAttributeValue(Attributes.ATTACK_DAMAGE) * ISConfig.getAttackDamageIncrease());
             }
 
         }
@@ -62,10 +53,10 @@ public class GameEvents {
         if (!level.isClientSide) {
 
             if (entity instanceof SlimeEntity) {
-                if (event.getSource() != DamageSource.MAGIC || event.getSource() != DamageSource.ON_FIRE || event.getSource() != DamageSource.LAVA || event.getSource() != DamageSource.IN_FIRE) {
-                    event.setAmount(event.getAmount() / DAMAGE_RESISTANCE);
+                if (ImprovedSlimes.isSourceWeakness(event.getSource())) {
+                    event.setAmount(event.getAmount() * ISConfig.getWeaknessDamageIncrease());
                 } else {
-                    event.setAmount(event.getAmount() * WEAKNESS_DAMAGE_INCREASE);
+                    event.setAmount(event.getAmount() / ISConfig.getDamageResistance());
                 }
             }
 
@@ -80,8 +71,8 @@ public class GameEvents {
         if (!level.isClientSide) {
 
             if (entity instanceof SlimeEntity slime) {
-                if (slime.getLastDamageSource() != DamageSource.MAGIC) {
-                    event.setStrength(event.getOriginalStrength() / KNOCKBACK_RESISTANCE);
+                if (!ImprovedSlimes.isSourceWeakness(slime.getLastDamageSource())) {
+                    event.setStrength(event.getOriginalStrength() / ISConfig.getKnockbackResistance());
                 }
             }
 
