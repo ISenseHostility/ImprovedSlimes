@@ -2,13 +2,15 @@ package isensehostility.improved_slimes.event;
 
 import isensehostility.improved_slimes.ImprovedSlimes;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.monster.Slime;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.event.entity.EntityJoinLevelEvent;
+import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.living.LivingDamageEvent;
 import net.minecraftforge.event.entity.living.LivingKnockBackEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -28,8 +30,8 @@ public class GameEvents {
     private static final float WEAKNESS_DAMAGE_INCREASE = 1.3F;
 
     @SubscribeEvent
-    public static void onEntitySpawn(EntityJoinLevelEvent event) {
-        Level level = event.getLevel();
+    public static void onEntitySpawn(EntityJoinWorldEvent event) {
+        Level level = event.getWorld();
 
         if (!level.isClientSide) {
             Entity entity = event.getEntity();
@@ -43,7 +45,7 @@ public class GameEvents {
                 if (slime.getRandom().nextInt(100) < RARE_SLIME_CHANCE) {
                     slime.setSize(RARE_SLIME_SIZE, false);
 
-                    slime.setCustomName(Component.translatable("improved_slimes.rare_slime.name"));
+                    slime.setCustomName(new TranslatableComponent("improved_slimes.rare_slime.name"));
 
                     ImprovedSlimes.setMaxHealth(slime, (slime.getMaxHealth() * HEALTH_BOOST_RARE_SLIMES));
                 }
@@ -56,7 +58,7 @@ public class GameEvents {
 
     @SubscribeEvent
     public static void onEntityDamaged(LivingDamageEvent event) {
-        LivingEntity entity = event.getEntity();
+        LivingEntity entity = event.getEntityLiving();
         Level level = event.getEntity().getLevel();
 
         if (!level.isClientSide) {
@@ -74,7 +76,7 @@ public class GameEvents {
 
     @SubscribeEvent
     public static void onEntityKnocked(LivingKnockBackEvent event) {
-        LivingEntity entity = event.getEntity();
+        LivingEntity entity = event.getEntityLiving();
         Level level = event.getEntity().getLevel();
 
         if (!level.isClientSide) {
