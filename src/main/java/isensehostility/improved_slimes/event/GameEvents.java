@@ -1,15 +1,13 @@
 package isensehostility.improved_slimes.event;
 
 import isensehostility.improved_slimes.ImprovedSlimes;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.entity.monster.Slime;
-import net.minecraft.world.level.Level;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.ai.attributes.Attributes;
+import net.minecraft.entity.monster.SlimeEntity;
+import net.minecraft.util.DamageSource;
+import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.world.World;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.living.LivingDamageEvent;
 import net.minecraftforge.event.entity.living.LivingKnockBackEvent;
@@ -31,12 +29,12 @@ public class GameEvents {
 
     @SubscribeEvent
     public static void onEntitySpawn(EntityJoinWorldEvent event) {
-        Level level = event.getWorld();
+        World level = event.getWorld();
 
         if (!level.isClientSide) {
             Entity entity = event.getEntity();
 
-            if (entity instanceof Slime slime) {
+            if (entity instanceof SlimeEntity slime) {
                 if (slime.getSize() >= 3) {
                     ImprovedSlimes.setMaxHealth(slime, (slime.getMaxHealth() * HEALTH_BOOST_LARGE_SLIMES));
                 } else {
@@ -45,7 +43,7 @@ public class GameEvents {
                 if (slime.getRandom().nextInt(100) < RARE_SLIME_CHANCE) {
                     slime.setSize(RARE_SLIME_SIZE, false);
 
-                    slime.setCustomName(new TranslatableComponent("improved_slimes.rare_slime.name"));
+                    slime.setCustomName(new TranslationTextComponent("improved_slimes.rare_slime.name"));
 
                     ImprovedSlimes.setMaxHealth(slime, (slime.getMaxHealth() * HEALTH_BOOST_RARE_SLIMES));
                 }
@@ -59,11 +57,11 @@ public class GameEvents {
     @SubscribeEvent
     public static void onEntityDamaged(LivingDamageEvent event) {
         LivingEntity entity = event.getEntityLiving();
-        Level level = event.getEntity().getLevel();
+        World level = event.getEntity().level;
 
         if (!level.isClientSide) {
 
-            if (entity instanceof Slime) {
+            if (entity instanceof SlimeEntity) {
                 if (event.getSource() != DamageSource.MAGIC || event.getSource() != DamageSource.ON_FIRE || event.getSource() != DamageSource.LAVA || event.getSource() != DamageSource.IN_FIRE) {
                     event.setAmount(event.getAmount() / DAMAGE_RESISTANCE);
                 } else {
@@ -77,11 +75,11 @@ public class GameEvents {
     @SubscribeEvent
     public static void onEntityKnocked(LivingKnockBackEvent event) {
         LivingEntity entity = event.getEntityLiving();
-        Level level = event.getEntity().getLevel();
+        World level = event.getEntity().level;
 
         if (!level.isClientSide) {
 
-            if (entity instanceof Slime slime) {
+            if (entity instanceof SlimeEntity slime) {
                 if (slime.getLastDamageSource() != DamageSource.MAGIC) {
                     event.setStrength(event.getOriginalStrength() / KNOCKBACK_RESISTANCE);
                 }
